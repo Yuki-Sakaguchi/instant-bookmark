@@ -47,10 +47,12 @@ const App = (props) => {
         <StyledLink to="/">Home</StyledLink>
         <StyledLink to="/edit">edit</StyledLink>
         <StyledLink to="/bookmark/11111111111111">test bookmark</StyledLink>
+        <StyledLink to="/archive">archive</StyledLink>
         <StyledSection>
           <Route exact path="/" component={Home}/>
           <Route path="/edit" component={Edit}/>
           <Route path="/bookmark/:id" component={Bookmark}/>
+          <Route path="/archive" component={Archive}/>
         </StyledSection>
       </BrowserRouter>
     </>
@@ -159,9 +161,9 @@ const Bookmark = (props) => {
 
   useEffect(() => {
     (async () => {
-      const resTodo = await db.collection('bookmark').doc(id).get()
-      if (resTodo.data()) {
-        setData(resTodo.data())
+      const res = await db.collection('bookmark').doc(id).get()
+      if (res.data()) {
+        setData(res.data())
       }
     })()
   }, [db, id])
@@ -181,6 +183,43 @@ const Bookmark = (props) => {
                   </StyledAnc>
                 )}
               </div>
+            </div>
+        ) : <div>リストが取得できませんでした</div>
+      }
+    </>
+  )
+}
+
+
+const Archive = (props) => {
+  const [data, setData] = useState([])
+  const db = firebase.firestore()
+
+  useEffect(() => {
+    (async () => {
+      const res = await db.collection('bookmark').get()
+      
+      if (res.docs.length > 0) {
+        setData([
+          ...res.docs
+        ])
+      }
+    })()
+  }, [db])
+
+  console.log(data)
+
+  return (
+    <>
+      <h2>Archive</h2>
+      {Object.keys(data).length > 0
+        ? (
+            <div>
+              {data.map((item, index) => 
+                <StyledLink to={`/bookmark/${item.id}`} key={item.id}>
+                  <p>{item.id}</p>
+                </StyledLink>
+              )}
             </div>
         ) : <div>リストが取得できませんでした</div>
       }
